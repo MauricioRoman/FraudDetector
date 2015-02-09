@@ -3,6 +3,21 @@ from urlparse import urlparse
 import woothee
 import urllib
 
+def DJBHash(key):
+    # DJB Hash algorithm
+    hash = 5381
+    for i in range(len(key)):
+        hash = ((hash <<5) + hash) + ord(key[i])
+
+    return ( (hash & 0x7FFFFFFF))
+
+alexa_top_million = []
+f = open('../data/top-1m.csv')
+for line in f:
+    alexa_top_million.append(DJBHash( line.split(',')[1][:-1]))
+
+alexa_top_million_hashed = set(alexa_top_million)
+
 def parse_log_line(log_line):
     #Trim whitespace
     log_line = log_line.strip(' ')
@@ -13,6 +28,19 @@ def parse_log_line(log_line):
             line_array.append(x)
 
     return line_array
+
+def get_alexa_top_million(host):
+
+    try:
+        host_terms = host.split('.')
+        host_last_two_hashed =  DJBHash( '.'.join(host_terms[-2:]) )
+
+        if host_last_two_hashed in alexa_top_million_hashed:
+            return 1
+        else:
+            return 0
+    except:
+        return 0
 
 def get_status(s):
     if s == 'true':
@@ -140,13 +168,14 @@ def extract_features_from_log(line, source):
     p = urlparse(referer)
     scheme= get_scheme( p.scheme)
     hostname = get_hostname( p.hostname)
+    alexa_top_million = get_alexa_top_million(p.hostname)
     len_path = len( p.path)
     len_query = len(p.query)
     len_host = str(p.hostname).count('.')
 
     if source == 'training_data':
         return [ip_1, ip_2, ip_3, ip_4, category, os_version, version, vendor, name, os,
-                        scheme, hostname, len_path, len_query, len_host, status]
+                        scheme, hostname, alexa_top_million, len_path, len_query, len_host, status]
     elif source == 'live_data':
         return [ip_1, ip_2, ip_3, ip_4, category, os_version, version, vendor, name, os,
-                    scheme, hostname, len_path, len_query, len_host]
+                    scheme, hostname, alexa_top_million, len_path, len_query, len_host]
