@@ -5,6 +5,7 @@ import sys
 import numpy as np
 from common import extract_features_from_log
 
+
 def main():
 
     f = open('../data/train_data.tsv')
@@ -14,7 +15,8 @@ def main():
         data.append(row )
 
     columns = ['ip_1', 'ip_2', 'ip_3', 'ip_4', 'category', 'os_version', 'version', 'vendor',
-                  'name', 'os', 'scheme', 'hostname', 'len_path', 'len_query', 'len_host','status']
+                  'name', 'os', 'scheme', 'hostname', 'alexa_top_million', 'len_path', 'len_query',
+                  'len_host','status']
 
     df = DataFrame(data, columns = columns)
 
